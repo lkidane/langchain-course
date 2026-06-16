@@ -83,7 +83,8 @@ def run_agent(question: str):
         #process only first tool call - force one tool per iteration
         tool_call = tool_calls[0]
         tool_name = tool_call.get("name")
-        tool_args = tool_call.get("args", {})
+        tool_args = tool_call.get("args", {}) # ollama this model qwen3 download 
+        # ollama model minthsu
         tool_call_id = tool_call.get("id")
 
         print(f"Tool call: {tool_name} with args {tool_args}")
@@ -100,8 +101,12 @@ def run_agent(question: str):
         messages.append(ToolMessage(content=str(observation), tool_call_id=tool_call_id))   
     print("Max iterations reached without a final answer.")
     return None
-
+# the instances of the rag embeddings are supposed to be saved in data base. But for further searching we need to make indexing available by to the llm model searching it. 
+# 
 if __name__ == "__main__":
     print("Running agent...")
 
     result = run_agent("What is the price of a laptop with a gold discount?")
+
+
+    
