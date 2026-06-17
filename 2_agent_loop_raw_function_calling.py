@@ -25,24 +25,25 @@ from langchain.tools import tool
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 MAX_ITERATIONS = 10
-MODEL = "qwen3:1.7b"
+MODEL = "mymodel"
 
 
 @tool
 def get_product_price(product: str) -> float:
     """Get the price of a product."""
-    print(f"Executing get_product_price for {product}...")
+    
     prices = {
         "laptop": 999.99,
         "smartphone": 499.99,
         "headphones": 199.99,
     }
+    print(f"Executing get_product_price for {product}...")
     return prices.get(product, 0)
 
 @tool
 def apply_discount(price: float, discount_tier: str) -> float:
     """Apply a discount to a price."""
-    print(f"Executing apply_discount for price {price} with discount {discount}...")
+    
     discou_percentages = {
         
         "silver": 12,
@@ -50,13 +51,14 @@ def apply_discount(price: float, discount_tier: str) -> float:
         "bronze": 5,
     }
     discount = discou_percentages.get(discount_tier, 0) / 100
+    print(f"Executing apply_discount for price {price} with discount {discount}...")
     return round(price * (1 - discount), 2)
-
+# the run agent function
 def run_agent(question: str):
 
     tools = [get_product_price, apply_discount]
     tools_dict = {t.name: t for t in tools}
-    llm = init_chat_model(f"{MODEL}", temperature=0)
+    llm = init_chat_model(f"ollama:{MODEL}", temperature=0)
     llm_with_tools = llm.bind_tools(tools)
     print(f"Question: {question}")
     messages = [
@@ -78,7 +80,7 @@ def run_agent(question: str):
         if not tool_calls:
                 print(f"Final answer: {ai_message.content}")
                 return ai_message.content
-        response = llm(messages)
+        response = llm.invoke(messages)
 
         #process only first tool call - force one tool per iteration
         tool_call = tool_calls[0]
@@ -92,7 +94,7 @@ def run_agent(question: str):
         if not tool_to_use:
             print(f"Tool {tool_name} not found. Skipping tool call.")
             continue
-        observation = tool_to_use.invoke(**tool_args)
+        observation = tool_to_use.invoke(tool_args)
 
         print(f"[Tool Result] {observation}")
         

@@ -138,7 +138,8 @@ def run_agent(question: str):
             print(f"Final Answer: {final_answer}")
             return final_answer
 
-
+# ollama raw tool calling is not part of the given 
+# during the function calling scenario we include the traceable(name="ollama agent loop")
 # During run time
         # CHANGE 6: Parse tool calls from raw text with regex — fragile if LLM doesn't follow format.
         print(f"  [Parsing] Looking for Action and Action Input in LLM output...")
@@ -181,4 +182,4 @@ def run_agent(question: str):
 if __name__ == "__main__":
     print("Hello LangChain Agent (.bind_tools)!")
     print()
-    result = run_agent("What is the price of a laptop after applying a gold discount?")
+    result = run_agent("What is the price of a headphones after applying a gold discount?")

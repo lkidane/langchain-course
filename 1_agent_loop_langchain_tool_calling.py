@@ -25,7 +25,7 @@ from langchain.tools import tool
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 MAX_ITERATIONS = 10
-MODEL = "qwen3:1.7b"
+MODEL = "mymodel"
 
 
 @tool
@@ -39,38 +39,55 @@ def get_product_price(product: str) -> float:
     }
     return prices.get(product, 0)
 
+# @tool
+# def apply_discount(price: float, discount_tier: str) -> float:
+#     """Apply a discount to a price."""
+#     print(f"Executing apply_discount for price {price} with discount {discount}...")
+#     discou_percentages = {
+        
+#         "silver": 12,
+#         "gold": 23,
+#         "bronze": 5,
+#     }
+#     discount = discou_percentages.get(discount_tier, 0) / 100
+#     return round(price * (1 - discount), 2)
+
+
 @tool
 def apply_discount(price: float, discount_tier: str) -> float:
     """Apply a discount to a price."""
-    print(f"Executing apply_discount for price {price} with discount {discount}...")
-    discou_percentages = {
-        
+    discount_percentages = {
         "silver": 12,
         "gold": 23,
         "bronze": 5,
     }
-    discount = discou_percentages.get(discount_tier, 0) / 100
+    discount = discount_percentages.get(discount_tier, 0) / 100
+
+    print(f"Executing apply_discount for price {price} with tier {discount_tier}...")
+
     return round(price * (1 - discount), 2)
+
+
 
 def run_agent(question: str):
 
     tools = [get_product_price, apply_discount]
     tools_dict = {t.name: t for t in tools}
-    llm = init_chat_model(f"{MODEL}", temperature=0)
+    llm = init_chat_model(f"ollama:{MODEL}", temperature=0)
     llm_with_tools = llm.bind_tools(tools)
     print(f"Question: {question}")
     messages = [
         SystemMessage(content="You are a helpful assistant that provides product pricing information and applies discounts." \
         "STRICT RULES: you must follow those exactly:" \
-        " 1) ever guess or assume product prices, use the get_product_price tool." \
-        " 2) nly call apply_discount after you have received the price from get_product_price. pass the exact price. Do not pass a made-up number."
+        " 1)Never guess or assume product prices, use the get_product_price tool." \
+        " 2)Only call apply_discount after you have received the price from get_product_price. pass the exact price. Do not pass a made-up number."
         " 3)Always respond with the final answer after using the tools."), 
 
 
         HumanMessage(content=question)
     ]
     
-    for _ in range(1, MAX_ITERATIONS + 1):
+    for _ in range(1, MAX_ITERATIONS + 1): 
         print(f"\nIteration {_}:")
         ai_message = llm_with_tools.invoke(messages)
         tool_calls = ai_message.tool_calls
@@ -78,7 +95,7 @@ def run_agent(question: str):
         if not tool_calls:
                 print(f"Final answer: {ai_message.content}")
                 return ai_message.content
-        response = llm(messages)
+        response = llm.invoke(messages)
 
         #process only first tool call - force one tool per iteration
         tool_call = tool_calls[0]
@@ -93,7 +110,7 @@ def run_agent(question: str):
         if not tool_to_use:
             print(f"Tool {tool_name} not found. Skipping tool call.")
             continue
-        observation = tool_to_use.invoke(**tool_args)
+        observation = tool_to_use.invoke(tool_args)
 
         print(f"[Tool Result] {observation}")
         
@@ -106,7 +123,7 @@ def run_agent(question: str):
 if __name__ == "__main__":
     print("Running agent...")
 
-    result = run_agent("What is the price of a laptop with a gold discount?")
+    result = run_agent("What is the price of a keyboard with a gold discount?")
 
 
     
