@@ -2,7 +2,8 @@ import os
 from typing import Any, Dict
 
 from dotenv import load_dotenv
-from langchain.agents import create_react_agent, create_tool_calling_agent, AgentExecutor
+# from langchain.agents import  AgentExecutor
+from langchain.agents.agent import AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import ToolMessage
@@ -14,7 +15,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_ollama import ChatOllama
 from langchain import hub
 # from langchain_huggingface import HuggingFaceEmbeddings
-
+from langchain.agents import create_react_agent
 
 load_dotenv()
 
